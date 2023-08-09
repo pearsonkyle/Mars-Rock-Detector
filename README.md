@@ -176,9 +176,21 @@ To Do Plots:
 4. `python trainer.py -ws 19`
 
 
-TO DO:
+# TO DO:
 What should we upload to PDS?
 - Brain Coral Maps/Mask
 - Cleaned up rock mask (PNG) (add as output to mask2density.py)
 - Send Density Plots to Eldar and folks + Rerun with bigger window size
 - Compare density/size estimates in/out of Brain Coral section
+
+
+# License
+
+Copyright 2023, by the California Institute of Technology. ALL RIGHTS RESERVED. United States Government Sponsorship acknowledged. Any commercial use must be negotiated with the Office of Technology Transfer at the California Institute of Technology.
+ 
+This software may be subject to U.S. export control laws. By accepting this software, the user agrees to comply with all applicable U.S. export laws and regulations. User has the responsibility to obtain export licenses, or other export authority as may be required before exporting such information to foreign countries or providing access to foreign persons.
+
+
+# Acknowledgments
+
+The research described in this publication was carried out in part at the Jet Propulsion Laboratory, California Institute of Technology, under a contract with the National Aeronautics and Space Administration. This research has made use of the High Resolution Imaging Science Experiment on the Mars Reconnaissance Orbiter, under contract with the National Aeronautics and Space Administration. We acknowledge funding support from the National Aeronautics and Space Administration (NASA) Mars Data Analysis Program (MDAP) Grant Number NNH19ZDA001N.
