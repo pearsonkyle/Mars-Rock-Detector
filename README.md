@@ -84,14 +84,14 @@ After collecting a bunch of training samples we train an ensemble of 10 random f
 
 To find/segment rocks in your image use the script below
 
-`python eval.py -i images/PSP_001410_2210_RED_A_01_ORTHO.JP2`
+`python eval_rock.py -i images/PSP_001410_2210_RED_A_01_ORTHO.JP2`
 
 ![](figures/RandomForest_100_91_whiten_prediction.png)
 
-Use the `--plot` flag on the `eval.py` script to plot results while evaluating. The script can take up to 24 hours on some images and will save a mask of the predicted rock shadows that are used for the analysis below.
+Use the `--plot` flag on the `eval_rock.py` script to plot results while evaluating. The script can take up to 24 hours on some images and will save a mask of the predicted rock shadows that are used for the analysis below.
 
 ```
-usage: eval.py [-h] [-i IMAGE] [-r RES] [-th THREADS] [-tr TRAIN] [-te TEST] [-o OUTDIR] [-p]
+usage: eval_rock.py [-h] [-i IMAGE] [-r RES] [-th THREADS] [-tr TRAIN] [-te TEST] [-o OUTDIR] [-p]
 
 optional arguments:
   -h, --help            show this help message and exit
