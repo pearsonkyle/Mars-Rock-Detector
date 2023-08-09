@@ -14,15 +14,15 @@ from trainer import train_ensembler
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-i", "--image", type=str, default="images/ESP_016287_2205_RED_A_01_ORTHO.JP2", help="Choose a JPEG2000 image to decode")
+    parser.add_argument("-i", "--image", type=str, default="images/PSP_001410_2210_RED_A_01_ORTHO.JP2", help="Choose a JPEG2000 image to decode")
 
     parser.add_argument("-r", "--res", type=int, default=0, help="Resolution level to decode (0 is highest resolution)")
 
     parser.add_argument("-th", "--threads", help="number of threads for background class", default=8, type=int)
 
-    parser.add_argument("-tr", "--train", help="training data for rocks", default="images/training_data_121.csv", type=str)
+    parser.add_argument("-tr", "--train", help="training data for rocks", default="training/training_data_121.csv", type=str)
 
-    parser.add_argument("-te", "--test", help="testing data for rocks", default="images/training_data_121.csv", type=str)
+    parser.add_argument("-te", "--test", help="testing data for rocks", default="training/testing_data_121.csv", type=str)
 
     parser.add_argument("-o", "--outdir", type=str, default="output/", help="Directory to save output images")
 
