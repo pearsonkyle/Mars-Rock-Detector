@@ -14,7 +14,7 @@ from trainer import train_ensembler
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-i", "--image", type=str, default="images/PSP_001410_2210_RED_A_01_ORTHO.JP2", help="Choose a JPEG2000 image to decode")
+    parser.add_argument("-i", "--image", type=str, default="images/ESP_037262_1845_RED_A_01_ORTHO.JP2", help="Choose a JPEG2000 image to decode")
 
     parser.add_argument("-r", "--res", type=int, default=0, help="Resolution level to decode (0 is highest resolution)")
 
@@ -104,6 +104,12 @@ if __name__ == "__main__":
 
             # save y_prob back to mask
             mask[i:i+eval_size, j:j+eval_size] = y_prob > 0.6 # TODO parameterize threshold?
+
+            # clean mask of groups smaller than equal to 2 pixels
+            labels, num = label(mask[i:i+eval_size, j:j+eval_size])
+            for k in range(1, num+1):
+                if np.sum(labels==k) <= 2:
+                    mask[i:i+eval_size, j:j+eval_size][labels==k] = False
 
             if args.plot:
                 # create plot
