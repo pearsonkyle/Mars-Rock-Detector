@@ -9,7 +9,7 @@ An automated algorithm for measuring the frequency and size distribution of boul
 3. `conda install numpy scipy matplotlib pandas`
 4. `conda install scikit-learn scikit-image opencv`
 5. `pip install glymur tqdm`
-
+6. `unzip training.zip`
 
 ## Image labels
 
@@ -141,12 +141,6 @@ python mask2dem.py
 --dem images/DTEEC_002175_2210_001410_2210_A01.IMG
 ```
 
-To Do Plots:
-- Size histogram in and out of brain coral area
-- Relative elevation histogram in and out of brain coral 
-- Histogram for insight landing site
-
-
 ## Reproducing Results
 1. `conda create -n rock python=3.9`
 2. `conda activate rock`
@@ -182,6 +176,9 @@ What should we upload to PDS?
 - Cleaned up rock mask (PNG) (add as output to mask2density.py)
 - Send Density Plots to Eldar and folks + Rerun with bigger window size
 - Compare density/size estimates in/out of Brain Coral section
+- Size histogram in and out of brain coral area
+- Relative elevation histogram in and out of brain coral 
+- Histogram for insight landing site
 
 
 # License
