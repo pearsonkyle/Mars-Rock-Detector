@@ -379,10 +379,9 @@ if __name__ == "__main__":
     plt.show()
 
 
-
     # relative elevation distribution plot in/out of brain coral
     fig,ax = plt.subplots(1, 1, figsize=(8, 6))
-    ax.set_title(f"{image_name}", fontsize=16)
+    ax.set_title(f"Elevation Distribution in {image_name.replace('_ORTHO.JP2','')}", fontsize=16)
     elevation_bins = np.linspace(-2,2,41) # in meters
 
     if np.any(brain_coral):

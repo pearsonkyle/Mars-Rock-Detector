@@ -1,6 +1,6 @@
 # HiRISE Rock Detector
 
-An automated algorithm for measuring the frequency and size distribution of boulders on Mars using data from HiRISE/MRO. We developed an interactive application for making training data in a quick manner which is later used optimize a classification algorithm. 
+An automated algorithm for measuring the frequency and size distribution of boulders on Mars using data from HiRISE/MRO. We developed an interactive application for making training data in a quick manner which is later used to optimize a classification algorithm. Digital elevation models can be combined with our results to search for correlations between rock size and elevation as a means of understanding the geological history of the Martian surface. For example, in periglacial terrains, the spatial distribution of rocks can be used to infer the history of ice and mechanisms that have shaped the landscape e.g. freeze-thaw cycles, ice sublimation, and ice flow. 
 
 ## Installation
 
@@ -71,11 +71,11 @@ python mask2dem.py
 --dem images/DTEEC_002175_2210_001410_2210_A01.IMG
 ```
 
-We're interested in measure the rock density inside of a terrain called Brain Coral which has similarity to terrain on Earth called a sorted stone circle. The masks are generated from: https://github.com/pearsonkyle/Mars-Brain-Coral-Network and look like this:
+We're interested in measure the rock density inside of a terrain called Brain Coral which has similarity to terrain on Earth called a sorted stone circle. The masks are generated from https://github.com/pearsonkyle/Mars-Brain-Coral-Network and look like this:
 
 ![](images/PSP_001410_2210_RED_A_01_ORTHO_classifier_mask.png)
 
-The low resolution corresponds to the classifier algorithm however full-resolution masks are also available. 
+That mask is low resolution which is from the classifier algorithm in that repo however full-resolution masks are also available. 
 
 ![](output/PSP_001410_2210_RED_A_01_ORTHO/elevation_distribution.png)
 
@@ -206,3 +206,5 @@ Does the abundance match the golumbeck images?
 add stdev to relative elevation distribution
 What would happen if you subtract a local slope?
 What is the overall slope distribution?
+- Include figure involving DEM comparison with plane estimation
+- look into slope distribution with new plane subtracted DEM
