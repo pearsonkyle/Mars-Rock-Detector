@@ -8,15 +8,12 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from skimage.measure import regionprops
-from scipy import spatial
-from skimage.transform import resize, downscale_local_mean
 from scipy.ndimage import binary_dilation, binary_closing, binary_erosion, label
-from itertools import cycle
 
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-i", "--image", type=str, default="images/PSP_001410_2210_RED_A_01_ORTHO.JP2",
+    parser.add_argument("-i", "--image", type=str, default="images/ESP_036762_1845_RED_A_01_ORTHO.JP2",
             help="Choose a JPEG2000 image to decode")
 
     parser.add_argument("-o", "--outdir", type=str, default="output/", help="Directory to save outputs")
@@ -128,9 +125,12 @@ if __name__ == "__main__":
 
     # plot histogram of sizes
     fig,ax = plt.subplots(1, 2, figsize=(8, 5))
-    counts, bins, _ = ax[0].hist(ellipse_area*area_per_pixel, bins=np.linspace(0.5,2.5,9), alpha=0.5, label='Ellipse Area')
+    total_count = len(ellipse_area)
+    counts, bins, _ = ax[0].hist(ellipse_area*area_per_pixel, bins=np.linspace(0.5,2.5,9), alpha=0.5, label=f'N = {total_count}')
     ax[0].set_xlabel(r'Area of Rock (m$^2$)')
     ax[0].set_title('Rock Size Distribution')
+    ax[0].grid(True, ls='--')
+    ax[0].legend(loc='best')
     dbin = np.diff(bins).mean()
     cfa = counts*(bins[:-1]+dbin)*area_per_pixel/total_area*100
 
@@ -147,14 +147,10 @@ if __name__ == "__main__":
     ax[1].legend(loc='best')
     ax[1].set_xlabel(r'Area of Rock (m$^2$)')
     ax[1].grid(True, ls='--')
-    ax[1].set_ylabel(r'Density (Rocks per 100x100 m$^2$)')
+    ax[1].set_ylabel(r'Rock Density (# per 100x100 m$^2$)')
     ax[1].set_xlim([0.25,2.5])
     ax[1].set_ylim([0, 90])
     plt.tight_layout()
     plt.savefig(os.path.join(outdir,'rock_density.png'))
+    plt.show()
     plt.close()
-
-
-    # save pickle of rock data
-    with open(os.path.join(outdir,'rock_data.pkl'), 'wb') as f:
-        pickle.dump(rock_data, f)
