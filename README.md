@@ -208,3 +208,4 @@ What would happen if you subtract a local slope?
 What is the overall slope distribution?
 - Include figure involving DEM comparison with plane estimation
 - look into slope distribution with new plane subtracted DEM
+- statistical tests between distributions (KL divergence, KS/JS test, etc)
