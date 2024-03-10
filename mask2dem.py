@@ -765,6 +765,8 @@ if __name__ == "__main__":
     plt.savefig(os.path.join(outdir,'cdf_gradient_distribution.png'))
     plt.show()
 
+    # save metrics to compare to other images
+
     # print(f"Mean size of rock shadow: {np.mean(ellipse_area):.2f} px")
     # print(f"Median size of rock shadow: {np.median(ellipse_area):.2f} px")
     # print(f"Standard deviation of rock shadow {np.std(ellipse_area):.2f} px")

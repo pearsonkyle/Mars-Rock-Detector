@@ -82,6 +82,9 @@ That mask is low resolution which is from the classifier algorithm in that repo 
 ~1.5 million rocks go into estimating those distributions. They're computed from many tiles that look like such:
 
 ![](output/PSP_001410_2210_RED_A_01_ORTHO/rock_7735_8325.png)
+
+![](output/PSP_001410_2210_RED_A_01_ORTHO/cdf_gradient_distribution.png)
+
 ## Make new training data
 
 The `label_maker.py` script is used to create/add training data. It takes a JPEG2000 image as input and then you can use the mouse to label regions of the image as either rocks or not rocks. The script will then save the image patches in a directory called `patches` in the current directory. The patches are saved as 11x11 images. The script will organize them based on the source images and class label. The class directory will contain the training samples along with pickle files storing the positions and image data, separately. This is useful for later when you want to train different models using the curated samples.
