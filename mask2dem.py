@@ -46,7 +46,7 @@ if __name__ == "__main__":
     glymur.set_option('lib.num_threads', args.threads)
 
     # open jp2k image
-    res = 1
+    res = 0
     image = glymur.Jp2k(args.image).read(rlevel=res).astype(np.float32)
     area_per_pixel = 0.3**2 # m^2
 
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     dem = resize(dem, rock_mask.shape, order=1, anti_aliasing=False, preserve_range=True)
 
     # apply gaussian filter to dem
-    dem = gaussian_filter(dem, sigma=4)
+    dem = gaussian_filter(dem, sigma=2)
 
     # mask bad values
     dem[dem < -1e8] = np.nan
@@ -117,6 +117,9 @@ if __name__ == "__main__":
     # compute size of each rock
     for region in tqdm(regions):
 
+        # if not np.any(brain_mask[region.coords[:,0], region.coords[:,1]]):
+        #     continue
+
         # filter out small rocks
         if region.area <= 2:
             continue
@@ -149,10 +152,15 @@ if __name__ == "__main__":
         non_nan_x = xg.flatten()[~np.isnan(flat_dem)]
         non_nan_y = yg.flatten()[~np.isnan(flat_dem)]
 
-        A = np.vstack([non_nan_x, non_nan_y, np.ones(len(non_nan_x))]).T
-        m, n, b = np.linalg.lstsq(A, non_nan_dem, rcond=None)[0]
-        plane_elevation = m*xg + n*yg + b
+        # go upto quadratic
+        # A = np.vstack([non_nan_x, non_nan_y, np.ones(len(non_nan_x))]).T
+        # m, n, b = np.linalg.lstsq(A, non_nan_dem, rcond=None)[0]
+        # plane_elevation = m*xg + n*yg + b
     
+        A = np.vstack([non_nan_x, non_nan_y, non_nan_x**2, non_nan_y**2, np.ones(len(non_nan_x))]).T
+        m, n, m2, n2, b = np.linalg.lstsq(A, non_nan_dem, rcond=None)[0]
+        plane_elevation = m*xg + n*yg + m2*xg**2 + n2*yg**2 + b
+
         # compute magnitude of gradient
         mag_linear = np.sqrt(m**2 + n**2)
 
@@ -163,20 +171,6 @@ if __name__ == "__main__":
 
         # compute relative elevation of rock within bbox
         rel_elevation_plane = np.nanmean(diff_dem[region.coords[:,0]-ymin, region.coords[:,1]-xmin])
-
-        # compare plane to elevation
-        # fig, ax = plt.subplots(4, 1, figsize=(6, 9))
-        # ax[0].imshow(dem[ymin:ymax,xmin:xmax], origin='lower',vmin=mean_elevation-5,vmax=mean_elevation+5, cmap='jet')
-        # ax[1].imshow(plane_elevation, origin='lower',vmin=mean_elevation-5,vmax=mean_elevation+5, cmap='jet')
-        # ax[2].imshow(diff_dem, origin='lower',vmin=-2,vmax=2, cmap='jet')
-        # #ax[3].imshow(rock_mask[ymin:ymax,xmin:xmax], origin='lower')
-        # ax[3].plot(region.coords[:,1]-xmin, region.coords[:,0]-ymin, 'r.',alpha=0.5)
-        # ddx, ddy = np.gradient(diff_dem)
-        # mag= np.sqrt(ddx**2 + ddy**2)
-        # ax[3].imshow(mag, origin='lower', cmap='jet', alpha=0.5)
-        # ax[3].imshow(diff_dem, origin='lower',vmin=-2,vmax=2, cmap='binary_r', alpha=0.5)
-        # plt.tight_layout()
-        # plt.show()
 
         # compute gradient of rock
         grad_m = np.nanmean(mag[region.coords[:,0]-ymin, region.coords[:,1]-xmin])
@@ -190,8 +184,49 @@ if __name__ == "__main__":
 
         if args.brain_coral is not None:
             # check if coords are in brain coral mask
-            if np.any(brain_mask[region.coords[:,0], region.coords[:,1]]):
+            if np.all(brain_mask[region.coords[:,0], region.coords[:,1]]):
                 rock_data["brain_coral"].append(True)
+
+                # # compare plane to elevation
+                # fig, ax = plt.subplots(2, 2, figsize=(9, 8))
+                # fig.suptitle(f"{'_'.join(image_name.split('_')[:3])}", fontsize=16)
+                # ax[0,0].imshow(image[ymin:ymax,xmin:xmax], origin='lower', cmap='binary_r')
+                # ax[0,0].set_title(f"Image", fontsize=16)
+                # ax[0,1].imshow(dem[ymin:ymax,xmin:xmax], origin='lower', cmap='jet')
+                # #ax[0,1].imshow(diff_dem, origin='lower',vmin=-2,vmax=2, cmap='jet')
+                # ax[0,1].set_title(f"Relative Elevation", fontsize=16)
+                # ax[1,0].imshow(image[ymin:ymax,xmin:xmax], origin='lower', cmap='binary_r')
+                # ax[1,0].imshow(rock_mask[ymin:ymax,xmin:xmax], origin='lower', cmap='Greens', alpha=0.5)
+                # ax[1,0].set_title(f"Rock Mask", fontsize=16)
+                # sdiff_dem = gaussian_filter(diff_dem, sigma=2)
+                # ddx, ddy = np.gradient(sdiff_dem)
+                # mag= np.sqrt(ddx**2 + ddy**2)
+                # ax[1,1].imshow(image[ymin:ymax,xmin:xmax], origin='lower', cmap='binary_r')
+                # ax[1,1].imshow(mag, origin='lower', cmap='jet', alpha=0.25)
+                # #ax[1,1].imshow(rock_mask[ymin:ymax,xmin:xmax], origin='lower', cmap='binary_r', alpha=0.5)
+                # ax[1,1].set_title('Gradient of Surface', fontsize=16)
+                # num_pix = 10/len_per_pixel     
+                # # plot 10m white line
+                # ax[1,1].plot([5, 5], [5, 5+10/len_per_pixel], 'w-', lw=2)
+                # ax[1,1].plot([5, 5+10/len_per_pixel], [5, 5], 'w-', lw=2)
+                # ax[1,1].text(5+1, 5+3, '10m', color='w', fontsize=14)
+
+                # ax[0,0].plot([5, 5], [5, 5+10/len_per_pixel], 'w-', lw=2)
+                # ax[0,0].plot([5, 5+10/len_per_pixel], [5, 5], 'w-', lw=2)
+                # ax[0,0].text(5+1, 5+3, '10m', color='w', fontsize=14)        
+
+                # ax[1,0].plot([5, 5], [5, 5+10/len_per_pixel], 'w-', lw=2)
+                # ax[1,0].plot([5, 5+10/len_per_pixel], [5, 5], 'w-', lw=2)
+                # ax[1,0].text(5+1, 5+3, '10m', color='w', fontsize=14)
+
+                # ax[0,1].plot([5, 5], [5, 5+10/len_per_pixel], 'w-', lw=2)
+                # ax[0,1].plot([5, 5+10/len_per_pixel], [5, 5], 'w-', lw=2)
+                # ax[0,1].text(5+1, 5+3, '10m', color='w', fontsize=14)
+
+                # plt.tight_layout()
+                # plt.savefig(os.path.join(outdir, f"rock_{np.mean(region.coords[:,0]):.0f}_{np.mean(region.coords[:,1]):.0f}.png"))
+                # plt.show()
+
             else:
                 rock_data["brain_coral"].append(False)
         else:
@@ -217,7 +252,6 @@ if __name__ == "__main__":
     ellipse_area = np.array(rock_data["ellipse_area"])
     rel_elevation = np.array(rock_data["rel_elevation"])
     rel_elevation2 = np.array(rock_data["elevation"]) - np.array(rock_data["mean_elevation"])
-    #rock_locations = np.array(rock_data["rock_locations"])
 
 
 
@@ -393,8 +427,8 @@ if __name__ == "__main__":
 
         bin_center = (bins[:-1]+bins[1:])/2
 
-        ax.plot(bin_center, density_bc, 'ko-', label=f'Brain Coral, median = {np.median(rel_elevation[brain_coral]):.2f} +- {np.std(rel_elevation[brain_coral]):.2f}',alpha=1)
-        ax.plot(bin_center, density_bg, 'ro-', label=f'Background, median = {np.median(rel_elevation[~brain_coral]):.2f} +- {np.std(rel_elevation[~brain_coral]):.2f}',alpha=1)
+        ax.plot(bin_center, density_bc, 'ko-', label=f'Brain Coral, median = {np.median(rel_elevation[brain_coral]):.2f} +- {np.std(rel_elevation[brain_coral]):.2f} m',alpha=1)
+        ax.plot(bin_center, density_bg, 'ro-', label=f'Background, median = {np.median(rel_elevation[~brain_coral]):.2f} +- {np.std(rel_elevation[~brain_coral]):.2f} m',alpha=1)
         # make bar chart
         #ax.bar(bin_center, density_bc, width=np.diff(bins), color='k', alpha=0.75, label=f'Brain Coral, mean = {np.mean(rel_elevation[brain_coral]):.2f} +- {np.std(rel_elevation[brain_coral]):.2f}')
         #ax.bar(bin_center, density_bg, width=np.diff(bins), color='r', alpha=0.75, label=f'Background, mean = {np.mean(rel_elevation[~brain_coral]):.2f} +- {np.std(rel_elevation[~brain_coral]):.2f}')
