@@ -1,4 +1,4 @@
-# HiRISE Rock Detector
+# Automatic Rock Detection and Mapping from HiRISE Imagery
 
 An automated algorithm for measuring the frequency and size distribution of boulders on Mars using data from HiRISE/MRO. We developed an interactive application for making training data in a quick manner which is later used to optimize a classification algorithm. Digital elevation models can be combined with our results to search for correlations between rock size and elevation as a means of understanding the geological history of the Martian surface. For example, in periglacial terrains, the spatial distribution of rocks can be used to infer the history of ice and mechanisms that have shaped the landscape e.g. freeze-thaw cycles, ice sublimation, and ice flow. 
 
@@ -71,7 +71,9 @@ python mask2dem.py
 --dem images/DTEEC_002175_2210_001410_2210_A01.IMG
 ```
 
-We're interested in measure the rock density inside of a terrain called Brain Coral which has similarity to terrain on Earth called a sorted stone circle. The masks are generated from https://github.com/pearsonkyle/Mars-Brain-Coral-Network and look like this:
+![](output/PSP_001410_2210_RED_A_01_ORTHO/rock_7735_8325.png)
+
+Brain coral is a terrain on Mars that has a similar appearance to a sorted stone circle on Earth. The rock size distribution can be used to infer the geological history of the terrain. For example, the rock size distribution can be used to infer the history of ice and mechanisms that have shaped the landscape e.g. freeze-thaw cycles, ice sublimation, and ice flow. Brain coral masks can be integrated with our analysis and are generated from https://github.com/pearsonkyle/Mars-Brain-Coral-Network
 
 ![](images/PSP_001410_2210_RED_A_01_ORTHO_classifier_mask.png)
 
@@ -80,8 +82,6 @@ That mask is low resolution which is from the classifier algorithm in that repo 
 ![](output/PSP_001410_2210_RED_A_01_ORTHO/elevation_distribution.png)
 
 ~1.5 million rocks go into estimating those distributions. They're computed from many tiles that look like such:
-
-![](output/PSP_001410_2210_RED_A_01_ORTHO/rock_7735_8325.png)
 
 ![](output/PSP_001410_2210_RED_A_01_ORTHO/cdf_gradient_distribution.png)
 
@@ -206,11 +206,14 @@ This software may be subject to U.S. export control laws. By accepting this soft
 The research described in this publication was carried out in part at the Jet Propulsion Laboratory, California Institute of Technology, under a contract with the National Aeronautics and Space Administration. This research has made use of the High Resolution Imaging Science Experiment on the Mars Reconnaissance Orbiter, under contract with the National Aeronautics and Space Administration. We acknowledge funding support from the National Aeronautics and Space Administration (NASA) Mars Data Analysis Program (MDAP) Grant Number NNH19ZDA001N.
 
 
-# Questions?
-Does the abundance match the golumbeck images?
-add stdev to relative elevation distribution
-What would happen if you subtract a local slope?
-What is the overall slope distribution?
-- Include figure involving DEM comparison with plane estimation
-- look into slope distribution with new plane subtracted DEM
-- statistical tests between distributions (KL divergence, KS/JS test, etc)
+# TODO
+- spatial distribution of rock density (~10-100 m windows)
+- show slope distribution without subtracting plane 
+- add statistical test for distributions
+- Change vertical stretch in gradient plot
+- How to estimate peak to trough height in brain coral areas?
+- peak/trough mask based on gradients? - look at height distribution in brain coral areas
+
+
+## Outstanding Questions
+- Does the abundance match the golumbeck images?

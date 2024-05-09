@@ -152,14 +152,14 @@ if __name__ == "__main__":
         non_nan_x = xg.flatten()[~np.isnan(flat_dem)]
         non_nan_y = yg.flatten()[~np.isnan(flat_dem)]
 
-        # go upto quadratic
-        # A = np.vstack([non_nan_x, non_nan_y, np.ones(len(non_nan_x))]).T
-        # m, n, b = np.linalg.lstsq(A, non_nan_dem, rcond=None)[0]
-        # plane_elevation = m*xg + n*yg + b
+        # linear regression
+        A = np.vstack([non_nan_x, non_nan_y, np.ones(len(non_nan_x))]).T
+        m, n, b = np.linalg.lstsq(A, non_nan_dem, rcond=None)[0]
+        plane_elevation = m*xg + n*yg + b
     
-        A = np.vstack([non_nan_x, non_nan_y, non_nan_x**2, non_nan_y**2, np.ones(len(non_nan_x))]).T
-        m, n, m2, n2, b = np.linalg.lstsq(A, non_nan_dem, rcond=None)[0]
-        plane_elevation = m*xg + n*yg + m2*xg**2 + n2*yg**2 + b
+        # A = np.vstack([non_nan_x, non_nan_y, non_nan_x**2, non_nan_y**2, np.ones(len(non_nan_x))]).T
+        # m, n, m2, n2, b = np.linalg.lstsq(A, non_nan_dem, rcond=None)[0]
+        # plane_elevation = m*xg + n*yg + m2*xg**2 + n2*yg**2 + b
 
         # compute magnitude of gradient
         mag_linear = np.sqrt(m**2 + n**2)
@@ -797,3 +797,7 @@ if __name__ == "__main__":
     # save pickle of rock data
     # with open(os.path.join(outdir,'rock_data.pkl'), 'wb') as f:
     #     pickle.dump(rock_data, f)
+
+
+    # TODO calculate absolute gradient instead of relative? fit smaller plane to estimate?
+    
