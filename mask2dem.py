@@ -1,7 +1,6 @@
 import os
 os.environ["OPENCV_IO_MAX_IMAGE_PIXELS"] = pow(2,40).__str__()
 import cv2
-import pickle
 import glymur
 import argparse
 import rasterio
@@ -12,6 +11,7 @@ from skimage.measure import regionprops
 from scipy.ndimage import label, gaussian_filter
 from skimage.transform import resize
 from scipy import stats
+import joblib
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -29,6 +29,8 @@ def parse_args():
 
     parser.add_argument("-th", "--threads", default=4, type=int,
             help="number of threads for reading in JP2000 image")
+
+    # run mask2dem.py --image images/ESP_016287_2205_RED_A_01_ORTHO.JP2 --dem images/DTEED_077488_2205_016287_2205_A01.IMG -b images/ESP_016287_2205_RED_classifier_mask.png
 
     return parser.parse_args()
 
@@ -60,7 +62,7 @@ if __name__ == "__main__":
     outdir = os.path.join(args.outdir, os.path.splitext(os.path.basename(args.image))[0])
 
     # read in boolean mask for rocks
-    rock_mask = cv2.imread(os.path.join(outdir,"rock_mask_cleaned.png"), cv2.IMREAD_GRAYSCALE)
+    rock_mask = cv2.imread(os.path.join(outdir,"rock_mask_0.png"), cv2.IMREAD_GRAYSCALE)
     rock_mask = rock_mask.astype(bool)
 
     # load brain coral mask if provided
@@ -98,18 +100,20 @@ if __name__ == "__main__":
 
     # lists to store size of each rock
     rock_data = {
+        "diameter": [],         # diameter of rock
         "pixel_sizes": [],      # number of pixels in rock
         "ellipse_area": [],     # area of ellipse that fits rock
         "rock_locations": [],   # location of rock in pixels
-        "elevation": [],        # elevation of rock in meters
-        "rel_elevation": [],    # elevation of rock in meters relative to mean elevation
-        "mean_elevation": [],   # mean elevation of image
-        "slope": [],            # slope of terrain in degrees
-        "gradient": [],         # gradient of terrain in meters
         "brain_coral": [],      # whether rock is in brain coral
-        "diameter": [],         # diameter of rock
-        "plane_gradient": [],  # linear gradient of terrain in meters
-        "plane_slope": []      # linear slope of terrain in degrees
+        "elevation": [],        # elevation of rock in meters
+        "rel_elevation": [],    # relative elevation of rock in meters  after plane fit
+        "mean_elevation": [],   # average elevation of plane
+        "rplane_slope": [],     # slope of rock after plane fit in m/px
+        "rplane_slope_deg": [], # slope of rock after plane fit in deg
+        "plane_slope": [],      # linear gradient of terrain in meters 
+        "plane_slope_deg": [],  # linear slope of terrain in degrees
+        "total_area_brain": total_area_brain,
+        "total_area_background": total_area_background 
     }
 
     bbox = 150 # ~100-150 meters for 0.3-0.5 m/pixel resolution
@@ -142,7 +146,7 @@ if __name__ == "__main__":
         elevation = np.nanmean(dem[region.coords[:,0], region.coords[:,1]])
     
         # compute relative elevation of rock within bbox
-        mean_elevation = np.nanmedian(dem[ymin:ymax,xmin:xmax])
+        median_elevation = np.nanmedian(dem[ymin:ymax,xmin:xmax])
         #rel_elevation = elevation - mean_elevation
 
         # estimate plane, using linalg, elevation = mx + ny + b
@@ -157,10 +161,6 @@ if __name__ == "__main__":
         m, n, b = np.linalg.lstsq(A, non_nan_dem, rcond=None)[0]
         plane_elevation = m*xg + n*yg + b
     
-        # A = np.vstack([non_nan_x, non_nan_y, non_nan_x**2, non_nan_y**2, np.ones(len(non_nan_x))]).T
-        # m, n, m2, n2, b = np.linalg.lstsq(A, non_nan_dem, rcond=None)[0]
-        # plane_elevation = m*xg + n*yg + m2*xg**2 + n2*yg**2 + b
-
         # compute magnitude of gradient
         mag_linear = np.sqrt(m**2 + n**2)
 
@@ -169,10 +169,10 @@ if __name__ == "__main__":
         ddx, ddy = np.gradient(diff_dem)
         mag = np.sqrt(ddx**2 + ddy**2)
 
-        # compute relative elevation of rock within bbox
+        # compute relative elevation of rock after plane fit
         rel_elevation_plane = np.nanmean(diff_dem[region.coords[:,0]-ymin, region.coords[:,1]-xmin])
 
-        # compute gradient of rock
+        # compute gradient of rock after plane fit
         grad_m = np.nanmean(mag[region.coords[:,0]-ymin, region.coords[:,1]-xmin])
         grad_deg = np.arctan(grad_m/len_per_pixel)*180/np.pi
 
@@ -239,22 +239,23 @@ if __name__ == "__main__":
         rock_data["rock_locations"].append(region.centroid)
         rock_data["elevation"].append(elevation)
         rock_data["rel_elevation"].append(rel_elevation_plane)
-        rock_data["mean_elevation"].append(mean_elevation)
-        rock_data["slope"].append(grad_deg)
-        rock_data["gradient"].append(grad_m)
-        rock_data["plane_gradient"].append(mag_linear)
-        rock_data["plane_slope"].append(np.arctan(mag_linear/len_per_pixel)*180/np.pi)
+        rock_data["rplane_slope"].append(grad_m)
+        rock_data["rplane_slope_deg"].append(grad_deg) 
+        rock_data["plane_slope"].append(mag_linear)
+        rock_data["plane_slope_deg"].append(np.arctan(mag_linear/len_per_pixel)*180/np.pi)
+
+    # save rock data to file
+    with open(os.path.join(outdir, "rock_data.pkl"), 'wb') as f:
+        joblib.dump(rock_data, f)
 
     # cast as numpy arrays
-    grad = np.array(rock_data["slope"])
+    grad = np.array(rock_data["rplane_slope_deg"])
     brain_coral = np.array(rock_data["brain_coral"])
     pixel_sizes = np.array(rock_data["pixel_sizes"])
     ellipse_area = np.array(rock_data["ellipse_area"])
     rel_elevation = np.array(rock_data["rel_elevation"])
-    rel_elevation2 = np.array(rock_data["elevation"]) - np.array(rock_data["mean_elevation"])
 
-
-
+    # make some plots
     fig,ax = plt.subplots(1, 1, figsize=(8, 6))
     ax.set_title(f"Rock Sizes in {image_name}", fontsize=16)
 
@@ -716,7 +717,6 @@ if __name__ == "__main__":
     plt.savefig(os.path.join(outdir,'gradient_distribution.png'))
     plt.show()
 
-
     # slope vs size
     fig,ax = plt.subplots(1, 1, figsize=(8, 6))
     ax.set_title(f"{image_name}", fontsize=16)
@@ -765,6 +765,8 @@ if __name__ == "__main__":
     plt.savefig(os.path.join(outdir,'cdf_gradient_distribution.png'))
     plt.show()
 
+
+
     # save metrics to compare to other images
 
     # print(f"Mean size of rock shadow: {np.mean(ellipse_area):.2f} px")
@@ -799,5 +801,4 @@ if __name__ == "__main__":
     #     pickle.dump(rock_data, f)
 
 
-    # TODO calculate absolute gradient instead of relative? fit smaller plane to estimate?
-    
+    # TODO calculate absolute gradient instead of from relative elevation
