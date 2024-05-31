@@ -166,7 +166,7 @@ if __name__ == "__main__":
 
         # compute gradient of surface minus plane
         diff_dem = dem[ymin:ymax,xmin:xmax] - plane_elevation
-        ddx, ddy = np.gradient(diff_dem)
+        ddx, ddy = np.gradient(dem[ymin:ymax,xmin:xmax])
         mag = np.sqrt(ddx**2 + ddy**2)
 
         # compute relative elevation of rock within bbox
@@ -225,7 +225,7 @@ if __name__ == "__main__":
 
                 # plt.tight_layout()
                 # plt.savefig(os.path.join(outdir, f"rock_{np.mean(region.coords[:,0]):.0f}_{np.mean(region.coords[:,1]):.0f}.png"))
-                # plt.show()
+                # plt.close()
 
             else:
                 rock_data["brain_coral"].append(False)
@@ -327,7 +327,7 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     plt.savefig(os.path.join(outdir,'rock_density.png'))
-    plt.show()
+    plt.close()
 
 
 
@@ -410,7 +410,7 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     plt.savefig(os.path.join(outdir,'cdf_rock_density.png'))
-    plt.show()
+    plt.close()
 
 
     # relative elevation distribution plot in/out of brain coral
@@ -457,7 +457,7 @@ if __name__ == "__main__":
     ax.legend(loc='best', fontsize=14)
     plt.tight_layout()
     plt.savefig(os.path.join(outdir,'elevation_distribution.png'))
-    plt.show()
+    plt.close()
 
 
     # create a plot of sizes vs elevation
@@ -529,7 +529,7 @@ if __name__ == "__main__":
 
         plt.tight_layout()
         plt.savefig(os.path.join(outdir,'multi_size_vs_elevation.png'))
-        plt.show()
+        plt.close()
 
     else:
         fig,ax = plt.subplots(1, 1, figsize=(8, 6))
@@ -567,7 +567,7 @@ if __name__ == "__main__":
         ax.legend(loc='best', fontsize=14)
         plt.tight_layout()
         plt.savefig(os.path.join(outdir,'multi_size_vs_elevation.png'))
-        plt.show()
+        plt.close()
 
 
     if np.any(brain_coral):
@@ -633,7 +633,7 @@ if __name__ == "__main__":
 
         plt.tight_layout()
         plt.savefig(os.path.join(outdir,'multi_size_vs_slope.png'))
-        plt.show()
+        plt.close()
 
     else:
         fig,ax = plt.subplots(1, 1, figsize=(8, 6))
@@ -671,7 +671,7 @@ if __name__ == "__main__":
         ax.legend(loc='best', fontsize=14)
         plt.tight_layout()
         plt.savefig(os.path.join(outdir,'multi_size_vs_slope.png'))
-        plt.show()
+        plt.close()
 
 
     # slope vs size
@@ -714,7 +714,7 @@ if __name__ == "__main__":
     ax.set_xlim([0,30])
     plt.tight_layout()
     plt.savefig(os.path.join(outdir,'gradient_distribution.png'))
-    plt.show()
+    plt.close()
 
 
     # slope vs size
@@ -763,7 +763,7 @@ if __name__ == "__main__":
     ax.set_xlim([0,30])
     plt.tight_layout()
     plt.savefig(os.path.join(outdir,'cdf_gradient_distribution.png'))
-    plt.show()
+    plt.close()
 
     # save metrics to compare to other images
 
