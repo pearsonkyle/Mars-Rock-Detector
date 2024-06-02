@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
         # compute elevation of rock
         elevation = np.nanmean(dem[region.coords[:,0], region.coords[:,1]])
-    
+
         # compute relative elevation of rock within bbox
         median_elevation = np.nanmedian(dem[ymin:ymax,xmin:xmax])
         #rel_elevation = elevation - mean_elevation
@@ -166,7 +166,7 @@ if __name__ == "__main__":
 
         # compute gradient of surface minus plane
         diff_dem = dem[ymin:ymax,xmin:xmax] - plane_elevation
-        ddx, ddy = np.gradient(dem[ymin:ymax,xmin:xmax])
+        ddx, ddy = np.gradient(diff_dem)
         mag = np.sqrt(ddx**2 + ddy**2)
 
         # compute relative elevation of rock after plane fit

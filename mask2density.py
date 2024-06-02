@@ -152,5 +152,5 @@ if __name__ == "__main__":
     ax[1].set_ylim([0, 90])
     plt.tight_layout()
     plt.savefig(os.path.join(outdir,'rock_density.png'))
-    plt.show()
     plt.close()
+    print(f"Saved {os.path.join(outdir,'rock_density.png')}")
