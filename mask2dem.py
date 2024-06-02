@@ -11,6 +11,8 @@ from skimage.measure import regionprops
 from scipy.ndimage import label, gaussian_filter
 from skimage.transform import resize
 from scipy import stats
+import pandas as pd
+import xarray as xr
 import joblib
 
 def parse_args():
@@ -107,13 +109,13 @@ if __name__ == "__main__":
         "brain_coral": [],      # whether rock is in brain coral
         "elevation": [],        # elevation of rock in meters
         "rel_elevation": [],    # relative elevation of rock in meters  after plane fit
-        "mean_elevation": [],   # average elevation of plane
+        "median_elevation": [],   # average elevation of plane
         "rplane_slope": [],     # slope of rock after plane fit in m/px
         "rplane_slope_deg": [], # slope of rock after plane fit in deg
         "plane_slope": [],      # linear gradient of terrain in meters 
         "plane_slope_deg": [],  # linear slope of terrain in degrees
-        "total_area_brain": total_area_brain,
-        "total_area_background": total_area_background 
+        #"total_area_brain": total_area_brain, # will be added later
+        #"total_area_background": total_area_background 
     }
 
     bbox = 150 # ~100-150 meters for 0.3-0.5 m/pixel resolution
@@ -238,15 +240,36 @@ if __name__ == "__main__":
         rock_data["diameter"].append(region.equivalent_diameter_area) # in pixels
         rock_data["rock_locations"].append(region.centroid)
         rock_data["elevation"].append(elevation)
+        rock_data["median_elevation"].append(median_elevation)
         rock_data["rel_elevation"].append(rel_elevation_plane)
         rock_data["rplane_slope"].append(grad_m)
         rock_data["rplane_slope_deg"].append(grad_deg) 
         rock_data["plane_slope"].append(mag_linear)
         rock_data["plane_slope_deg"].append(np.arctan(mag_linear/len_per_pixel)*180/np.pi)
 
-    # save rock data to file
-    with open(os.path.join(outdir, "rock_data.pkl"), 'wb') as f:
-        joblib.dump(rock_data, f)
+    # save rock data to file - not efficient
+    #with open(os.path.join(outdir, "rock_data.pkl"), 'wb') as f:
+    #    joblib.dump(rock_data, f)
+
+    # split up rock locations
+    centroid_x, centroid_y = zip(*rock_data["rock_locations"])
+    rock_data["centroid_x"] = centroid_x
+    rock_data["centroid_y"] = centroid_y
+
+    del rock_data["rock_locations"]
+
+    # convert to pandas dataframe
+    df = pd.DataFrame(rock_data)
+
+    # convert to netcdf
+    ds = xr.Dataset.from_dataframe(df)
+
+    # add total area
+    ds.attrs["total_area"] = total_area
+    ds.attrs["total_area_background"] = total_area_background
+
+    # save to netcdf
+    ds.to_netcdf(os.path.join(outdir, "rock_data.nc"))
 
     # cast as numpy arrays
     grad = np.array(rock_data["rplane_slope_deg"])
