@@ -353,8 +353,6 @@ if __name__ == "__main__":
     plt.savefig(os.path.join(outdir,'rock_density.png'))
     plt.close()
 
-
-
     fig,ax = plt.subplots(2, 1, figsize=(7, 9))
     ax[0].set_title(f"Rock Distribution in {image_name.replace('_ORTHO.JP2','')}", fontsize=16)
 
