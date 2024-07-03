@@ -15,7 +15,7 @@ dirs = [d for d in dirs if os.path.isdir(d)]
 
 # create subplots
 fig, ax = plt.subplots(1, 3, figsize=(24, 6))
-ax[1].set_title("Elevation Distribution in Brain Coral", fontsize=16)
+ax[1].set_title("Elevation Distribution in Brain Terrain", fontsize=16)
 ax[2].set_title("Elevation Distribution in Background", fontsize=16)
 ax[0].set_title("Difference in Elevation Distributions", fontsize=16)
 elevation_bins = np.linspace(-2, 2, 61)  # in meters
