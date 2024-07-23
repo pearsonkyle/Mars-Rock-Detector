@@ -1,6 +1,16 @@
 # Automatic Rock Detection and Mapping from HiRISE Imagery
 
-An automated algorithm for measuring the frequency and size distribution of boulders on Mars using data from HiRISE/MRO. We developed an interactive application for making training data in a quick manner which is later used to optimize a classification algorithm. Digital elevation models can be combined with our results to search for correlations between rock size and elevation as a means of understanding the geological history of the Martian surface. For example, in periglacial terrains, the spatial distribution of rocks can be used to infer the history of ice and mechanisms that have shaped the landscape e.g. freeze-thaw cycles, ice sublimation, and ice flow. 
+ - Development of an automated algorithm for boulder size measurement on Mars using HiRISE/MRO data
+- Creation of interactive application to generate training data efficiently
+- Optimization of classification algorithm with the generated data
+- Combining digital elevation models with results for correlations between rock size and elevation
+- Understanding geological history through analysis of Martian surface features, such as periglacial terrains
+- Inferring landscape shaping mechanisms (e.g., freeze-thaw cycles, ice sublimation, and ice flow) using spatial distribution of rocks
+
+![](output/Mars10_Poster.png)
+![](output/gradient_distribution_comparison.png)
+
+
 
 ## Installation
 
