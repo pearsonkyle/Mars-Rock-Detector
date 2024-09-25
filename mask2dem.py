@@ -67,6 +67,10 @@ if __name__ == "__main__":
     rock_mask = cv2.imread(os.path.join(outdir,"rock_mask_0.png"), cv2.IMREAD_GRAYSCALE)
     rock_mask = rock_mask.astype(bool)
 
+    # clean mask with binary operations
+    #rock_mask = binary_closing(rock_mask)
+    #rock_mask = mask & binary_dilation(binary_erosion(rock_mask),iterations=3)
+
     # load brain coral mask if provided
     if args.brain_coral is not None:
         brain_mask = cv2.imread(args.brain_coral, cv2.IMREAD_GRAYSCALE)
