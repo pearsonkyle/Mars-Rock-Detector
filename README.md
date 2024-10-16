@@ -1,5 +1,7 @@
 # Automatic Rock Detection and Mapping from HiRISE Imagery
 
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97-Chat_Assistant-yellow)](https://hf.co/chat/assistant/67060a7bc5e1bc78b6870519)
+
  - Development of an automated algorithm for boulder size measurement on Mars using HiRISE/MRO data
 - Creation of interactive application to generate training data efficiently
 - Optimization of classification algorithm with the generated data
