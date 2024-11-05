@@ -12,16 +12,15 @@
 ![](output/Mars10_Poster.png)
 ![](output/gradient_distribution_comparison.png)
 
-
-
 ## Installation
 
 1. `conda create -n rock python=3.9`
 2. `conda activate rock`
-3. `conda install numpy scipy matplotlib pandas`
-4. `conda install scikit-learn scikit-image opencv`
-5. `pip install glymur tqdm rasterio`
-6. `unzip training.zip`
+3. `conda install -c conda-forge netCDF4`
+4. `conda install numpy scipy matplotlib pandas`
+5. `conda install scikit-learn scikit-image opencv`
+6. `pip install glymur tqdm rasterio`
+7. `unzip training.zip`
 
 ## Evaluation
 
@@ -195,17 +194,6 @@ After collecting a bunch of training samples we train an ensemble of 10 random f
 4. `python trainer.py -ws 19`
 
 
-# TO DO:
-What should we upload to PDS?
-- Brain Coral Maps/Mask
-- Cleaned up rock mask (PNG) (add as output to mask2density.py)
-- Send Density Plots to Eldar and folks + Rerun with bigger window size
-- Compare density/size estimates in/out of Brain Coral section
-- Size histogram in and out of brain coral area
-- Relative elevation histogram in and out of brain coral 
-- Histogram for insight landing site
-
-
 # License
 
 Copyright 2023, by the California Institute of Technology. ALL RIGHTS RESERVED. United States Government Sponsorship acknowledged. Any commercial use must be negotiated with the Office of Technology Transfer at the California Institute of Technology.
@@ -217,15 +205,9 @@ This software may be subject to U.S. export control laws. By accepting this soft
 
 The research described in this publication was carried out in part at the Jet Propulsion Laboratory, California Institute of Technology, under a contract with the National Aeronautics and Space Administration. This research has made use of the High Resolution Imaging Science Experiment on the Mars Reconnaissance Orbiter, under contract with the National Aeronautics and Space Administration. We acknowledge funding support from the National Aeronautics and Space Administration (NASA) Mars Data Analysis Program (MDAP) Grant Number NNH19ZDA001N.
 
+## Paper Abstract
 
-# TODO
-- spatial distribution of rock density (~10-100 m windows)
-- show slope distribution without subtracting plane 
-- add statistical test for distributions
-- Change vertical stretch in gradient plot
-- How to estimate peak to trough height in brain coral areas?
-- peak/trough mask based on gradients? - look at height distribution in brain coral areas
+We developed an automated rock detection algorithm using a random forest (Breiman, 2001) ensemble classifier consisting of 10 individual models trained through k-fold cross-validation on approximately 4,000 manually labeled boulders in HiRISE imagery. The ensemble approach improves robustness and accuracy by combining multiple independent predictions, reducing overfitting and handling noise in the input data more effectively than single classifiers. Each model processes 11x11 pixel windows of standardized pixel values which limits the maximum detectable boulder size to approximately 3-6m depending on image resolution. To reduce false positives and influence from bad pixels we limit a minimum detection size of 3 pixels corresponding to ~1-1.5 meter. The standardization of pixel values acts as an automated contrast adjustment, eliminating the need for manual tuning and improving performance over previous techniques (Banfield 2011, Golembeck 2012, 2021). We employ a sliding window approach across the full image to generate a complete segmentation map for all boulders, which is then integrated with brain coral terrain masks generated through convolutional neural networks (Pearson et al., 2024) to enable comparative analysis of rock distributions.
 
+After generating the initial segmentation map, we isolate individual boulders and analyze their shadow characteristics along with local elevation context. The extent of each boulder's shadow is measured and combined with the solar incidence angle from the image metadata to compute approximate boulder dimensions. To analyze the relationship between rock placement and local topography, we compute relative elevation by fitting and subtracting a plane from 100x100 m² regions surrounding each detected boulder. This local detrending removes bias from regional slopes and allows us to focus on boulder positions relative to immediate topographic features like ridges and depressions. Our analysis is performed using orthorectified images and HiRISE-derived digital elevation models (DEMs) to ensure precise spatial alignment. The combination of ensemble classification, automated shadow analysis, terrain masks, and detrended topographic data allows us to quantify rock densities and local elevation distributions across brain coral terrain systematically. We analyzed 10 different images measuring rock concentrations and elevation distributions both within brain coral terrain and in adjacent control regions outside the terrain masks, enabling robust testing of competing formation hypotheses through direct comparison of rock populations inside and outside these distinctive landforms
 
-## Outstanding Questions
-- Does the abundance match the golumbeck images?
