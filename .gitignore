@@ -1,2 +1,2 @@
 *.IMG
-*.JP2
+*.JP2__pycache__/
