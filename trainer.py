@@ -6,7 +6,7 @@ import argparse
 import joblib
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import RocCurveDisplay
 
@@ -41,9 +41,14 @@ class Ensembler():
     # Training
     # ------------------------------------------------------------------
 
-    def fit(self, X: np.ndarray, y: np.ndarray, preprocess: bool = True) -> None:
+    def fit(self, X: np.ndarray, y: np.ndarray, preprocess: bool = True, n_folds: int = None) -> None:
         """
-        Train every model in the ensemble on independent random splits.
+        Train every model in the ensemble using stratified k-fold cross-validation.
+
+        Each model is assigned to a fold in round-robin order.  The model trains
+        on the remaining (k-1) folds and its validation accuracy is measured on
+        the held-out fold.  Using ``StratifiedKFold`` ensures each fold preserves
+        the class-label distribution of the full dataset.
 
         Parameters
         ----------
@@ -53,27 +58,36 @@ class Ensembler():
             Label vector of shape (n_samples,).
         preprocess:
             When True (default) each sample is normalised before training.
+        n_folds:
+            Number of folds for stratified k-fold cross-validation.  Defaults
+            to the number of models in the ensemble so that every model is
+            trained on a distinct held-out fold.
         """
         self.xdim = X.shape[1]
         self._do_preprocess = preprocess
 
         Xp = self._preprocess(X) if preprocess else X
 
+        # Build stratified k-fold splits (preserves class balance per fold)
+        k = n_folds if n_folds is not None else len(self.models)
+        skf = StratifiedKFold(n_splits=k, shuffle=True, random_state=42)
+        folds = list(skf.split(Xp, y))
+
         for i, model in enumerate(self.models):
 
-            # split into training and validation sets
-            X_train, X_test, y_train, y_test = train_test_split(
-                Xp, y, test_size=0.15, random_state=i
-            )
+            # cycle through folds in round-robin if n_models > n_folds
+            train_idx, val_idx = folds[i % k]
+            X_train, X_val = Xp[train_idx], Xp[val_idx]
+            y_train, y_val = y[train_idx], y[val_idx]
 
             # train the model
             model.fit(X_train, y_train)
 
-            # compute validation accuracy
-            y_pred = model.predict(X_test)
-            acc = accuracy_score(y_test, y_pred)
+            # compute validation accuracy on the held-out fold
+            y_pred = model.predict(X_val)
+            acc = accuracy_score(y_val, y_pred)
             self.acc.append(acc)
-            logger.debug("Model %d validation accuracy: %.4f", i, acc)
+            logger.debug("Model %d (fold %d/%d) validation accuracy: %.4f", i, i % k + 1, k, acc)
 
     # ------------------------------------------------------------------
     # Inference
@@ -214,6 +228,7 @@ def train_ensembler(
     plot: bool = False,
     n_models: int = 9,
     n_jobs: int = -1,
+    n_folds: int = None,
 ) -> Ensembler:
     """
     Build and train an ensemble of Random Forest classifiers.
@@ -233,6 +248,10 @@ def train_ensembler(
     n_jobs:
         Number of parallel jobs forwarded to each ``RandomForestClassifier``.
         ``-1`` uses all available CPU cores.
+    n_folds:
+        Number of folds for stratified k-fold cross-validation passed to
+        :meth:`Ensembler.fit`.  Defaults to ``n_models`` so each model is
+        evaluated on a distinct held-out fold.
 
     Returns
     -------
@@ -262,7 +281,7 @@ def train_ensembler(
     ])
 
     # train the ensemble
-    models.fit(rock_data, rock_label)
+    models.fit(rock_data, rock_label, n_folds=n_folds)
 
     # print accuracy of each model
     print(models.acc)
@@ -288,6 +307,10 @@ def parse_args():
 
     parser.add_argument("-nm", "--n_models", type=int, default=9,
             help="number of models in the ensemble")
+
+    parser.add_argument("-k", "--n_folds", type=int, default=None,
+            help="number of folds for stratified k-fold cross-validation "
+                 "(default: same as --n_models)")
 
     parser.add_argument("-j", "--n_jobs", type=int, default=-1,
             help="number of parallel jobs for each Random Forest (-1 = all CPUs)")
@@ -318,6 +341,7 @@ if __name__ == "__main__":
             f'training/testing_data_{args.windowsize**2}.csv',
             n_models=args.n_models,
             n_jobs=args.n_jobs,
+            n_folds=args.n_folds,
             plot=args.plot,
         )
 
